@@ -85,12 +85,27 @@ function renderDataset(arr, addNewLine) {
 
   //Render suggestions
   document.querySelectorAll(".quickOrder-list .itemNoContainer input").forEach(function(el) {
-    el.addEventListener("keyup", function(e){
-      if (e.keyCode !== 9) {
+    el.addEventListener("keyup", function(e){      
+      if (e.keyCode !== 9) {     
+        // var isInAjaxDataset = ajaxDataset.filter(function(o){
+        //   return o.itemNo === e.currentTarget.value;
+        // }).length > 0;
+        // if (isInAjaxDataset)
+        // console.log(e.currentTarget.closest(".quickOrder-row").index());      
         renderSuggestions(e);
       }
     });
   });
+  // document.querySelectorAll(".quickOrder-list .itemNoContainer input").forEach(function(el) {
+  //   el.addEventListener("focusin", function(e){      
+  //     if (e.keyCode !== 9) {
+  //       var isInAjaxDataset = ajaxDataset.filter(function(o){
+  //         return o.itemNo === e.currentTarget.value;
+  //       }).length > 0;
+  //       console.log(isInAjaxDataset);       
+  //     }
+  //   });
+  // });
 
   //Quantity Event -- Change
   document.querySelectorAll(".quickOrder-list .quantityContainer input").forEach(function(el) {
@@ -181,10 +196,13 @@ function renderTotal() {
   document.querySelector(".quickOrder-total").insertAdjacentHTML('beforeend',output);
 }
 
-function renderSuggestionBox(data) {
+function renderSuggestionBox(data, val) {  
   var output = "";
   output += '<div id="suggestionBox">';
-  data.map(function(o){ output+= '<div class="suggestionLine" data-itemNo="'+o.itemNo+'">'+o.itemNo+' - '+ o.description+' </div>'});
+  data.map(function(o){ 
+    var isAlreadyInListClass = dataset.filter(function(o2) {return o2.itemNo === o.itemNo}).length > 0 ? "disabled" : "";    
+    output+= '<div class="suggestionLine '+ isAlreadyInListClass +'" data-itemNo="'+o.itemNo+'">'+o.itemNo+' - '+ o.description+' </div>'
+  });
   output += '</div>';
   return output;
 }
@@ -193,28 +211,30 @@ function registerEventsSuggestionBox() {
   document.querySelectorAll(".suggestionLine").forEach(function(el){
     el.addEventListener("click", function(e){
       var itemNo = e.currentTarget.attributes["data-itemNo"].value;
-      dataset = dataset.concat(ajaxDataset.filter(function(o){return o.itemNo === itemNo}));
-      renderDataset(dataset, false);
-      inputCollection[inputCollection.length-1].focus();
+      if(!e.currentTarget.classList.contains("disabled")) {
+        dataset = dataset.concat(ajaxDataset.filter(function(o){return o.itemNo === itemNo}));
+        renderDataset(dataset, false);
+        inputCollection[inputCollection.length-1].focus();
+      }
     });
   });
 }
 
 function renderSuggestions(e) {
   var val = e.currentTarget.value;  
-  var data = ajaxDataset.filter(function(o) {return o.itemNo.includes(val) && dataset.filter(function(o2){return o2.itemNo === o.itemNo}).length === 0});  
+  var data = ajaxDataset.filter(function(o) {return o.itemNo.includes(val)});  
   if(document.querySelector("#suggestionBox") !== null) {
     document.querySelector("#suggestionBox").remove();
   }
   if (data.length > 0) {    
-    e.currentTarget.parentNode.insertAdjacentHTML('beforeend',renderSuggestionBox(data));
+    e.currentTarget.parentNode.insertAdjacentHTML('beforeend',renderSuggestionBox(data, val));
     registerEventsSuggestionBox()
   } 
 }
 
 function calculateInputCollection() {
   inputCollection = []; 
-  document.querySelectorAll(".quickOrder-list input").forEach(function(el){ 
+  document.querySelectorAll(".itemNoContainer input").forEach(function(el){ 
     inputCollection.push(el);  
   });   
 }

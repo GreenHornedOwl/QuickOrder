@@ -32,3 +32,8 @@ body {
 .suggestionLine:last-child {
   margin-bottom: 0px;
 }
+.disabled {
+  color: lightgray;
+  cursor: not-allowed;
+  user-select: none;
+}
